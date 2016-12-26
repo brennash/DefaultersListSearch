@@ -5,9 +5,11 @@ import csv
 import datetime
 import re
 import json
+import string
 import smtplib
 import logging
 import pickle
+from sets import Set
 from ReadExcel import ReadExcel
 from optparse import OptionParser
 from flask import render_template
@@ -20,6 +22,7 @@ from email.mime.text import MIMEText
 
 # The global variables holding the json records
 global jsonList
+global wordList
 
 # Setup the app, with a random secret key for the sessions
 app = Flask(__name__)
@@ -33,33 +36,89 @@ def index():
 
 @app.route('/api/search/', methods=['POST'])
 def search():
-	print 'SEARCH REQUEST'
 	print len(jsonList),' records'
 
 	if request.method == 'POST':
 		print 'POST REQUEST'
 		print request.form.get("search_string")
-		print request.data,"REQUEST DATA"
-	
-		return 'Result'
+		#print request.data,"REQUEST DATA"
+		responseList = getSearchList(request.data)
 	else:
 		print 'GET REQUEST'
 		return redirect(url_for('index'))
 
-def parseDirectory(verbose, directory):
+def getSearchList(searchString):
 	global jsonList
-	filePaths = []
+	global wordList
+
+	searchTokens = searchString.split(' ')
+	totalIndexes = Set()
+	for token in searchTokens:
+		if token.upper() in wordList.keys():
+			indexSet = wordList[token]
+			if len(totalIndexes) == 0:
+				totalIndexes = totalIndexes.union(indexSet)
+			else:
+				totalIndexes = totalIndexes.intersection(indexSet)
+
+	for element in totalIndexes:
+		print element
+
+
+def parseDirectory(verbose, directory):
+	# Setup the global variable holding the JSON
+	global jsonList
 	jsonList  = []
+
+	# The list of Excel files
+	filePaths = []
+
+	# Go through the data directory looking for Excel files
 	for root, directories, files in os.walk(directory):
 		for filename in files:
 			if '.xls' in filename:
 				filepath = os.path.join(root, filename)
 				filePaths.append(os.path.dirname(os.path.abspath(filepath))+os.path.sep+filename)
 
+	# Now read each file and extract the data
 	readExcel = ReadExcel()
 	for fileName in filePaths:
 		jsonOutput = readExcel.parseFile(fileName)
 		jsonList   = jsonList + jsonOutput
+
+	# Lastly, define a hash set for each word in the output
+	createHashSet()
+
+def createHashSet():
+	global jsonList
+	global wordList
+	wordList = {}
+	addedWords = Set()
+
+	for index, jsonString in enumerate(jsonList):
+		jsonElement = json.loads(jsonString)
+		name    = jsonElement['name']
+		address = jsonElement['address']
+
+		name  = name.replace("\'","'")
+		name  = name.translate(string.punctuation)
+		address  = address.translate(string.punctuation)
+
+		tokens = name.split(' ') + address.split(' ')
+		for token in tokens:
+			if token.upper() not in addedWords:
+				indexSet = Set()
+				indexSet.add(index)
+				wordList[token.upper()] = indexSet
+				addedWords.add(token.upper())
+			else:
+				indexSet = wordList[token.upper()] 
+				indexSet.add(index)
+				wordList[token.upper()] = indexSet
+
+	#for word in wordList.keys():
+	#	indexSet = wordList[word]
+	#	print word, indexSet
 
 def main(argv):
 	# Setup the search engine
