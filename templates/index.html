@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<!--- HEAD ---->
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0"/>
+  <title>{{title}}</title>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='imgs/favicon.ico') }}">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/materialize.css')}}" type="text/css" rel="stylesheet" media="screen,projection"/ >
+</head>
+
+
+<!--- BODY ---->
+<body>
+
+  <!--- CONTAINERS ---->
+  <div class="container">
+
+    <div class="section">
+      <form class="col s12" action="search/" method="post" enctype="multipart/form-data" name="inputform" id="inputform">
+        <fieldset>
+          <legend>Search</legend>
+          <div class="row">
+            <div class="input-field col s12">
+              <input id="search_string" name="search_string" type="text" class="validate">
+              <label for="search_string">Search</label>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="input-field col s3">
+              <button class="btn waves-effect waves-light" type="submit" name="action">Submit Request
+                <i class="material-icons right">send</i>
+              </button>
+            </div>
+          </div>
+
+        </fieldset>
+      </form>
+    </div>
+  </div>
+
+  <!--  Scripts-->
+  <script src="{{ url_for('static', filename='js/jquery-2.2.1.min.js')}}"></script>
+  <script src="{{ url_for('static', filename='js/materialize.js')}}"></script>
+  </body>
+</html>

@@ -5,7 +5,7 @@ A searchable web-front end to the Irish tax defaulters listings.
 ```
 	virtualenv venv
 	. venv/bin/activate
-	pip install Flask openpyxl
+	pip install Flask openpyxl unidecode regex requests
 ```
 
 
