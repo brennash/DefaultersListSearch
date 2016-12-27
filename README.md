@@ -30,5 +30,7 @@ There are two Flask components which need to be started to run the platform,
 	./bin/startSearch.sh
 ```
 
+## Screenshots
+Below is a screenshot of the main query web front-end. 
 ![Alt text](/static/img/screenshot.png?raw=true "Screenshot")
 
