@@ -45,7 +45,7 @@ class ReadExcel:
 		return jsonList
 
 	def asJSON(self, header, valueList):
-		jsonDict = {}
+		jsonDict = collections.OrderedDict()
 		errors   = 0
 
 		if header is not None:
@@ -59,8 +59,7 @@ class ReadExcel:
 				countyIndex = header.index('county')
 				jsonDict['address']    = valueList[addrIndex] + ' ' + valueList[countyIndex]
 			else:
-				jsonDict['address']    = valueList[addrIndex]				
-
+				jsonDict['address']    = valueList[addrIndex]
 		else:
 			jsonDict['name']       = valueList[0]
 			jsonDict['address']    = valueList[1]

@@ -9,6 +9,7 @@ import string
 import smtplib
 import logging
 import pickle
+import collections
 from sets import Set
 from ReadExcel import ReadExcel
 from optparse import OptionParser
@@ -36,15 +37,11 @@ def index():
 
 @app.route('/api/search/', methods=['POST'])
 def search():
-	print len(jsonList),' records'
-
 	if request.method == 'POST':
-		print 'POST REQUEST'
 		searchString = request.form.get("search_string")
 		responseList = getSearchList(searchString)
 		return responseList
 	else:
-		print 'GET REQUEST'
 		return redirect(url_for('index'))
 
 def getSearchList(searchString):
@@ -67,13 +64,13 @@ def getSearchList(searchString):
 			if len(totalIndexes) == 0:
 				totalIndexes = indexSet
 			else:
-				print 'LEN BEFORE INTERSECTION',len(totalIndexes)
 				totalIndexes = totalIndexes.intersection(indexSet)
-				print 'LEN AFTER INTERSECTION',len(totalIndexes)
 	resultList = []
+
 	for element in totalIndexes:
 		resultList.append(jsonList[element])
 
+	resultList.sort()
 	return json.dumps(resultList)
 
 def parseDirectory(verbose, directory):
@@ -97,6 +94,9 @@ def parseDirectory(verbose, directory):
 		jsonOutput = readExcel.parseFile(fileName)
 		jsonList   = jsonList + jsonOutput
 
+	# Sort the json list alphabetically by surname
+	jsonList.sort()
+
 	# Lastly, define a hash set for each word in the output
 	createHashSet()
 
@@ -106,15 +106,21 @@ def createHashSet():
 	wordList = {}
 	addedWords = Set()
 
+	# Build the hash set from the JSON elements
 	for index, jsonString in enumerate(jsonList):
 		jsonElement = json.loads(jsonString)
 		name    = jsonElement['name']
 		address = jsonElement['address']
 		occupation = jsonElement['occupation']
 
+		# The name details
 		name  = name.replace("\'","'")
+		name  = name.replace(","," ")
+		name  = name.replace("."," ")
+		name  = name.replace("-"," ")
 		name  = name.translate(string.punctuation)
 
+		# The address details
 		address  = address.replace(',',' ')
 		address  = address.replace('.',' ')
 		address  = address.replace('\t',' ')
@@ -123,12 +129,16 @@ def createHashSet():
 		address  = address.replace('-',' ')
 		address  = address.translate(string.punctuation)
 
+		# The occupation details
 		occupation = occupation.replace(',',' ')
 		occupation = occupation.replace('.',' ')
 		occupation = occupation.replace('-',' ')
 		occupation = occupation.replace('/',' ')
 
+		# Tokenize all the strings
 		tokens = name.split(' ') + address.split(' ') + occupation.split(' ')
+
+		# Add each token to the hashset
 		for token in tokens:
 			if token.upper() not in addedWords:
 				indexSet = Set()
