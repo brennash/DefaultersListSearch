@@ -30,4 +30,5 @@ There are two Flask components which need to be started to run the platform,
 	./bin/startSearch.sh
 ```
 
-<img src="static/img/screenshot.png">
+![Alt text](/static/img/screenshot.png?raw=true "Screenshot")
+
