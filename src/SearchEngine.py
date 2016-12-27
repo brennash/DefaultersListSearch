@@ -54,6 +54,9 @@ def getSearchList(searchString):
 	print 'JSONLIST LEN',len(jsonList)
 	print 'WORDLIST LEN',len(wordList)
 
+	searchString = searchString.replace(',',' ')
+	searchString = searchString.replace(':',' ')
+	searchString = searchString.replace('\t',' ')
 	searchTokens = searchString.split(' ')
 	totalIndexes = Set()
 	for token in searchTokens:
@@ -122,10 +125,6 @@ def createHashSet():
 				indexSet = wordList[token.upper()] 
 				indexSet.add(index)
 				wordList[token.upper()] = indexSet
-
-	#for word in wordList.keys():
-	#	indexSet = wordList[word]
-	#	print word, indexSet
 
 def main(argv):
 	# Setup the search engine
