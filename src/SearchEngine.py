@@ -51,11 +51,13 @@ def getSearchList(searchString):
 	global jsonList
 	global wordList
 
-	print 'JSONLIST LEN',len(jsonList)
-	print 'WORDLIST LEN',len(wordList)
-
+	# Remove some delimiters from the search string
+	searchString = searchString.replace('.',' ')
 	searchString = searchString.replace(',',' ')
 	searchString = searchString.replace(':',' ')
+	searchString = searchString.replace(';',' ')
+	searchString = searchString.replace("'"," ")
+	searchString = searchString.replace('"',' ')
 	searchString = searchString.replace('\t',' ')
 	searchTokens = searchString.split(' ')
 	totalIndexes = Set()
@@ -65,10 +67,9 @@ def getSearchList(searchString):
 			if len(totalIndexes) == 0:
 				totalIndexes = indexSet
 			else:
+				print 'LEN BEFORE INTERSECTION',len(totalIndexes)
 				totalIndexes = totalIndexes.intersection(indexSet)
-
-	print 'Len of indexes',len(totalIndexes)
-
+				print 'LEN AFTER INTERSECTION',len(totalIndexes)
 	resultList = []
 	for element in totalIndexes:
 		resultList.append(jsonList[element])
@@ -109,12 +110,25 @@ def createHashSet():
 		jsonElement = json.loads(jsonString)
 		name    = jsonElement['name']
 		address = jsonElement['address']
+		occupation = jsonElement['occupation']
 
 		name  = name.replace("\'","'")
 		name  = name.translate(string.punctuation)
+
+		address  = address.replace(',',' ')
+		address  = address.replace('.',' ')
+		address  = address.replace('\t',' ')
+		address  = address.replace(';',' ')
+		address  = address.replace(':',' ')
+		address  = address.replace('-',' ')
 		address  = address.translate(string.punctuation)
 
-		tokens = name.split(' ') + address.split(' ')
+		occupation = occupation.replace(',',' ')
+		occupation = occupation.replace('.',' ')
+		occupation = occupation.replace('-',' ')
+		occupation = occupation.replace('/',' ')
+
+		tokens = name.split(' ') + address.split(' ') + occupation.split(' ')
 		for token in tokens:
 			if token.upper() not in addedWords:
 				indexSet = Set()
@@ -148,7 +162,7 @@ def main(argv):
 	parseDirectory(options.verboseFlag, filename[0])
 
 	# Now run the application
-	app.run(host='0.0.0.0', port=1798, debug=options.verboseFlag)
+	app.run(host='0.0.0.0', port=1798, debug=False)
                 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
