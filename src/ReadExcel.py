@@ -53,8 +53,14 @@ class ReadExcel:
 			addrIndex   = header.index('address')
 			occIndex    = header.index('occupation')
 			jsonDict['name']       = valueList[nameIndex]
-			jsonDict['address']    = valueList[addrIndex]
 			jsonDict['occupation'] = valueList[occIndex]
+
+			if 'county' in header:
+				countyIndex = header.index('county')
+				jsonDict['address']    = valueList[addrIndex] + ' ' + valueList[countyIndex]
+			else:
+				jsonDict['address']    = valueList[addrIndex]				
+
 		else:
 			jsonDict['name']       = valueList[0]
 			jsonDict['address']    = valueList[1]

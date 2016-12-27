@@ -35,18 +35,17 @@ def index():
 def search():
 	if request.method == 'POST':
 		# Grab the request parameters
-		requestString = str(request.form.get('search_string'))
-		print requestString, 'request string'
-
-		#r = requests.post("http://localhost:1798/api/search/", data={'number': 12524, 'type': 'issue', 'action': 'show'})
-		#print(r.status_code, r.reason)
+		requestString = str(request.form.get('search_string')).upper()
 
 		res = requests.post('http://localhost:1798/api/search/', data={'search_string':requestString})
-		print 'response from server:',res.text
-		#dictFromServer = res.json()
-		#print 'Request String:',requestString
-		#return redirect(url_for('index'))
-		return 'Success!'
+		jsonStrData = json.loads(res.text)
+		jsonData    = []
+
+		for element in jsonStrData:
+			jsonElement = json.loads(element)
+			jsonData.append(jsonElement)
+
+		return render_template('results.html', results=jsonData)
 	else:
 		return redirect(url_for('index'))
 

@@ -40,9 +40,9 @@ def search():
 
 	if request.method == 'POST':
 		print 'POST REQUEST'
-		print request.form.get("search_string")
-		#print request.data,"REQUEST DATA"
-		responseList = getSearchList(request.data)
+		searchString = request.form.get("search_string")
+		responseList = getSearchList(searchString)
+		return responseList
 	else:
 		print 'GET REQUEST'
 		return redirect(url_for('index'))
@@ -51,19 +51,26 @@ def getSearchList(searchString):
 	global jsonList
 	global wordList
 
+	print 'JSONLIST LEN',len(jsonList)
+	print 'WORDLIST LEN',len(wordList)
+
 	searchTokens = searchString.split(' ')
 	totalIndexes = Set()
 	for token in searchTokens:
 		if token.upper() in wordList.keys():
 			indexSet = wordList[token]
 			if len(totalIndexes) == 0:
-				totalIndexes = totalIndexes.union(indexSet)
+				totalIndexes = indexSet
 			else:
 				totalIndexes = totalIndexes.intersection(indexSet)
 
-	for element in totalIndexes:
-		print element
+	print 'Len of indexes',len(totalIndexes)
 
+	resultList = []
+	for element in totalIndexes:
+		resultList.append(jsonList[element])
+
+	return json.dumps(resultList)
 
 def parseDirectory(verbose, directory):
 	# Setup the global variable holding the JSON
