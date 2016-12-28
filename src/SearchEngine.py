@@ -44,20 +44,21 @@ def search():
 	else:
 		return redirect(url_for('index'))
 
-def getSearchList(searchString):
+def getSearchList(inputString):
+	""" Function used to iterate through the input string, finding 
+	    the tokens used as the search terms, and then using these to 
+	    build the response to the search query. 
+	"""
 	global jsonList
 	global wordList
 
 	# Remove some delimiters from the search string
-	searchString = searchString.replace('.',' ')
-	searchString = searchString.replace(',',' ')
-	searchString = searchString.replace(':',' ')
-	searchString = searchString.replace(';',' ')
-	searchString = searchString.replace("'"," ")
-	searchString = searchString.replace('"',' ')
-	searchString = searchString.replace('\t',' ')
+	searchString = removePunctuation(inputString)
 	searchTokens = searchString.split(' ')
 	totalIndexes = Set()
+
+	# Iterate through the search tokens building a list of 
+	# indexes where the search token occurs from the records. 
 	for token in searchTokens:
 		if token.upper() in wordList.keys():
 			indexSet = wordList[token]
@@ -67,11 +68,31 @@ def getSearchList(searchString):
 				totalIndexes = totalIndexes.intersection(indexSet)
 	resultList = []
 
+	# Convert the indexes to the appropriate record
 	for element in totalIndexes:
 		resultList.append(jsonList[element])
 
+	# Sort these records in name order
 	resultList.sort()
+
+	# Return the result as a JSON string
 	return json.dumps(resultList)
+
+def removePunctuation(inputString):
+	""" Cleans up any input string by removing the punctuation 
+	    and replacing them with whitespace characters.
+	"""
+	resultString = inputString.replace('.',' ')
+	resultString = resultString.replace(',',' ')
+	resultString = resultString.replace(':',' ')
+	resultString = resultString.replace('-',' ')
+	resultString = resultString.replace('/',' ')
+	resultString = resultString.replace(';',' ')
+	resultString = resultString.replace('"',' ')
+	resultString = resultString.replace('\t',' ')
+	resultString = resultString.replace('\n',' ')
+	resultString = resultString.replace("'"," ")
+	return resultString
 
 def parseDirectory(verbose, directory):
 	# Setup the global variable holding the JSON
@@ -109,31 +130,18 @@ def createHashSet():
 	# Build the hash set from the JSON elements
 	for index, jsonString in enumerate(jsonList):
 		jsonElement = json.loads(jsonString)
-		name    = jsonElement['name']
-		address = jsonElement['address']
-		occupation = jsonElement['occupation']
+		name        = jsonElement['name']
+		address     = jsonElement['address']
+		occupation  = jsonElement['occupation']
 
 		# The name details
-		name  = name.replace("\'","'")
-		name  = name.replace(","," ")
-		name  = name.replace("."," ")
-		name  = name.replace("-"," ")
-		name  = name.translate(string.punctuation)
+		name  = removePunctuation(name)
 
 		# The address details
-		address  = address.replace(',',' ')
-		address  = address.replace('.',' ')
-		address  = address.replace('\t',' ')
-		address  = address.replace(';',' ')
-		address  = address.replace(':',' ')
-		address  = address.replace('-',' ')
-		address  = address.translate(string.punctuation)
+		address  = removePunctuation(address)
 
 		# The occupation details
-		occupation = occupation.replace(',',' ')
-		occupation = occupation.replace('.',' ')
-		occupation = occupation.replace('-',' ')
-		occupation = occupation.replace('/',' ')
+		occupation = removePunctuation(occupation)
 
 		# Tokenize all the strings
 		tokens = name.split(' ') + address.split(' ') + occupation.split(' ')
